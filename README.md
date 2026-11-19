@@ -6,7 +6,7 @@ An enterprise-style portfolio project demonstrating governed data engineering, r
 
 ## Status
 
-Repository foundation created. Phase 1 (database schema and synthetic data) is the first implementation phase and has not yet been marked complete.
+All ten planned phases are implemented as a portfolio-grade local application: governed synthetic data, FastAPI, quality and lineage, revision-safe RAG, authorized MCP tools, a Qwen agent, RBAC/audit, React UI, tests, Docker, CI, and GitHub Pages delivery.
 
 ## Planned architecture
 
@@ -68,7 +68,48 @@ The LLM boundary will remain provider-neutral so Ollama can later be replaced by
 
 The active integration branch is `develop`. Feature work should use short-lived branches and merge into `develop`; stable releases merge into `main`.
 
-Setup and run commands will be added in Phase 1 when executable components and pinned dependencies are introduced.
+## Quick start
+
+```bash
+ollama pull qwen2.5:7b
+ollama serve
+docker compose up --build
+```
+
+Open `http://localhost:5173`. The API is available at `http://localhost:8000/docs`. Ollama runs on the host; Docker connects through `host.docker.internal`.
+
+For native development:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e '.[dev]'
+python scripts/generate_synthetic_data.py
+uvicorn backend.app.main:app --reload
+cd frontend && npm install && npm run dev
+```
+
+## Demo scenarios
+
+- Ask why `P1007` could miss its next milestone and inspect evidence, MCP calls, document revisions, and lineage.
+- Request `SPEC-001` and confirm only released revision `R03` is current.
+- Call quality endpoints as a supplier and receive `403 Forbidden`.
+- Inspect authoritative sources and ownership on Data Governance.
+- Trace Engineering Documents from source system to AI response on Data Lineage.
+
+## Security model
+
+The backend—not the LLM—enforces permissions. Authorization happens before protected retrieval and before MCP results are returned. Supplier access is limited to externally classified current documents. Every assistant request records the user, role, tools, products, documents/revisions, model, and response ID.
+
+## Known limitations
+
+- Authentication headers are a synthetic demo identity layer, not production SSO.
+- The included static GitHub Pages UI uses fallback synthetic data unless a reachable backend URL is configured.
+- Lexical retrieval is available as an offline fallback; the production path uses local Sentence Transformers with pgvector.
+- Cloudflare Quick Tunnel is intentionally a manual demo step because tunnel URLs are ephemeral.
+
+## Enterprise migration
+
+Replace the demo headers with OIDC/Entra ID, move PostgreSQL to a managed pgvector-capable service, swap `OllamaQwenProvider` for Azure OpenAI/OpenAI, store documents in enterprise object storage, and export audit events to the corporate SIEM. Governance, authorization, MCP contracts, retrieval filters, and evidence structures remain unchanged.
 
 ## License
 

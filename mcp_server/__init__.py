@@ -1,0 +1,1 @@
+"""Authorized MCP server package."""
